@@ -1,0 +1,15 @@
+# Environment variables
+.env
+.env.*
+
+# Python
+__pycache__/
+*.pyc
+venv/
+
+# Node / React / Flutter
+node_modules/
+
+# Outputs / temp files
+outputs/
+temp/

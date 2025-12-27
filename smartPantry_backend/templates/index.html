@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SmartPantry - Home</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 50px;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .user-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px auto;
+            max-width: 400px;
+            display: none;
+        }
+
+        .user-info p {
+            margin: 5px 0;
+        }
+
+        .user-info .welcome {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .user-info .email {
+            opacity: 0.8;
+            font-size: 0.9em;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            text-align: center;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .feature-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .feature-card h2 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.5em;
+        }
+
+        .feature-card p {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: transform 0.2s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+        }
+
+        .btn-logout {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            margin-left: 10px;
+            padding: 8px 20px;
+            font-size: 0.9em;
+        }
+
+        .auth-buttons {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .auth-buttons .btn {
+            margin: 0 10px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: white;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            opacity: 0.8;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Loading State -->
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Checking authentication...</p>
+        </div>
+
+        <!-- Main Content (Hidden until auth check) -->
+        <div id="main-content" style="display: none;">
+            <div class="header">
+                <h1>🛒 SmartPantry</h1>
+                <p>Your Smart Pantry Management System</p>
+                
+                <!-- User Info Section -->
+                <div class="user-info" id="user-info">
+                    <p class="welcome">Welcome, <span id="user-name">User</span>!</p>
+                    <p class="email" id="user-email"></p>
+                    <div style="margin-top: 10px;">
+                        <a href="/nutrition_page" class="btn">Go to Dashboard</a>
+                        <button onclick="logout()" class="btn btn-logout">Logout</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="features">
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h2>Nutrition Tracker</h2>
+                    <p>Track the nutritional content of your food items. Add items and monitor calories, protein, fat, carbs, fiber, and sugar intake.</p>
+                    <a href="/nutrition_page" class="btn">Open Tracker</a>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🧾</div>
+                    <h2>Receipt Scanner</h2>
+                    <p>Scan receipts using OCR to automatically extract items, quantities, and prices. Store them in your database.</p>
+                    <a href="/receipt_page" class="btn">Scan Receipt</a>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🤖</div>
+                    <h2>AI Nutrition Coach</h2>
+                    <p>Get personalized nutrition analysis powered by AI. Our virtual nutritionist provides actionable recommendations.</p>
+                    <a href="/nutrition_page" class="btn">Get AI Analysis</a>
+                </div>
+            </div>
+
+            <!-- Authentication Buttons (shown when not logged in) -->
+            <div class="auth-buttons" id="auth-buttons">
+                <a href="/login_page" class="btn">Login</a>
+                <a href="/login_page" class="btn" onclick="sessionStorage.setItem('defaultTab', 'register')">Register</a>
+            </div>
+
+            <div class="footer">
+                <p>&copy; 2025 SmartPantry. Manage your pantry smarter.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check authentication on page load
+        async function checkAuth() {
+            try {
+                const response = await fetch('/check-auth');
+                const data = await response.json();
+                
+                // Hide loading, show main content
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+                
+                if (data.authenticated) {
+                    // User is logged in
+                    document.getElementById('user-name').textContent = data.user.name;
+                    document.getElementById('user-email').textContent = data.user.email;
+                    document.getElementById('user-info').style.display = 'block';
+                    document.getElementById('auth-buttons').style.display = 'none';
+                } else {
+                    // User is not logged in
+                    document.getElementById('user-info').style.display = 'none';
+                    document.getElementById('auth-buttons').style.display = 'block';
+                }
+            } catch (error) {
+                // If error, redirect to login page
+                window.location.href = '/login_page';
+            }
+        }
+
+        // Logout function
+        async function logout() {
+            try {
+                const response = await fetch('/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    // Reload page to update UI
+                    window.location.href = '/';
+                }
+            } catch (error) {
+                console.error('Logout failed:', error);
+                window.location.href = '/';
+            }
+        }
+
+        // Set default tab for login page if register button clicked
+        if (sessionStorage.getItem('defaultTab') === 'register') {
+            sessionStorage.removeItem('defaultTab');
+        }
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', checkAuth);
+    </script>
+</body>
+</html>
