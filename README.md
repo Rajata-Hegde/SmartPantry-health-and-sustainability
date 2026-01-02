@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Healthcare UI (demo)
 
 This is a minimal Vite + React app demonstrating a polished login flow and dashboard layout for a healthcare-grade UI.
@@ -26,3 +27,6 @@ CREATE TABLE IF NOT EXISTS "User" (
 );
 
 Next steps I can take: install dependencies, run the dev server, or integrate a real backend.
+=======
+# SmartPantry-health-and-sustainability
+>>>>>>> 2606739525c3fb92969a68a7cd1fb8aaf098e750
