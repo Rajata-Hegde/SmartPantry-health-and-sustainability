@@ -1,5 +1,6 @@
 import React from 'react'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import ElderFoodSafety from "./pages/ElderFoodSafety";
 
 import Login from './pages/Login'
 import Register from './pages/Register'
@@ -12,8 +13,13 @@ import Pantry from './pages/Pantry'
 import Dashboard from './pages/Dashboard'
 import NutritionTracker from './pages/NutritionTracker'
 import RecipeDetails from './pages/RecipeDetails'
+import ElderDetails from './pages/ElderDetails'
 
 import { isAuthenticated } from './auth'
+// import elderFoodRoutes from "./routes/elderFood.js";
+
+// app.use("/api/elders", elderFoodRoutes);
+
 
 // 🔐 Auth guard
 function Protected({ children }) {
@@ -88,6 +94,23 @@ export default function App() {
           </Protected>
         }
       />
+      <Route
+  path="/elders/:elderId"
+  element={
+    <Protected>
+      <ElderDetails />
+    </Protected>
+  }
+/>
+
+<Route
+  path="/elders/:elderId/food-safety"
+  element={
+    <Protected>
+      <ElderFoodSafety />
+    </Protected>
+  }
+/>
 
       {/* ========= FALLBACK ========= */}
       <Route path="*" element={<Navigate to="/login" replace />} />

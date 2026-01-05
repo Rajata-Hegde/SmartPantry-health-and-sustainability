@@ -688,7 +688,7 @@ router.get('/quick-tip', authenticateToken, async (req, res) => {
   try {
     // Get last 3 days of data for personalized tips
     const result = await pool.query(
-      `SELECT food_name, calories, protein, carbs, fat
+      `SELECT item_name, calories, protein, carbs, fat
        FROM nutrition_entries
        WHERE user_id=$1 AND date_consumed >= NOW() - INTERVAL '3 days'
        ORDER BY date_consumed DESC
