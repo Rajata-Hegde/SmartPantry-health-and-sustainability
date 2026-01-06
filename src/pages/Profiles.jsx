@@ -1,30 +1,20 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { loadElders, addElder, updateElder, deleteElder } from "../elders";
 import { UserIcon } from "../components/Icons";
 
 /* ===============================
-   DEFAULT CONDITIONS
+   DEFAULT CONDITIONS & MEDS
 ================================ */
-const defaultConditions = [
-  "Diabetes",
-  "Hypertension",
-  "Cardiac",
-  "Kidney",
-];
-
-const defaultMeds = ["Metformin", "Insulin"];
+const defaultConditions = ["Diabetes", "Hypertension", "Cardiac", "Kidney"];
+const defaultMeds = ["Metformin", "Insulin", "Warfarin", "Statins"];
 
 /* ===============================
-   PROFILE CARD
+   PROFILE CARD (FIXED)
 ================================ */
-function ProfileCard({ elder, onOpen, onDelete }) {
+function ProfileCard({ elder, onView, onEdit, onDelete }) {
   return (
-    <article
-      className="card feature-card"
-      onClick={onOpen}
-      style={{ cursor: "pointer" }}
-    >
+    <article className="card feature-card">
       <div className="feature-top">
         <div className="icon-wrap">
           <UserIcon />
@@ -33,27 +23,24 @@ function ProfileCard({ elder, onOpen, onDelete }) {
         <div>
           <h3 style={{ margin: 0 }}>{elder.name}</h3>
           <div className="muted small">
-            Age {elder.age ?? "—"} • {elder.gender} • {elder.diet || "Non-veg"}
+            Age {elder.age ?? "—"} • {elder.gender} • {elder.diet}
           </div>
         </div>
       </div>
 
       <div className="card-actions">
-        <button
-          className="btn"
-          onClick={(e) => {
-            e.stopPropagation();
-            onOpen();
-          }}
-        >
+        <button className="btn" onClick={onView}>
           View
         </button>
 
+        <button className="btn" onClick={() => onEdit(elder)}>
+          Edit
+        </button>
+
         <button
-          className="btn"
-          style={{ marginLeft: 8 }}
-          onClick={(e) => {
-            e.stopPropagation();
+          className="btn danger"
+          onClick={() => {
+            if (!window.confirm("Delete this elder profile?")) return;
             onDelete(elder.id);
           }}
         >
@@ -68,20 +55,23 @@ function ProfileCard({ elder, onOpen, onDelete }) {
    MAIN PAGE
 ================================ */
 export default function Profiles() {
+  const navigate = useNavigate();
+
   const [elders, setElders] = useState([]);
   const [editing, setEditing] = useState(null);
   const [showForm, setShowForm] = useState(false);
+
   const [form, setForm] = useState({
     name: "",
     age: "",
+    height: "",
+    weight: "",
     gender: "Other",
     diet: "Non-veg",
     conditions: [],
     allergies: "",
     meds: [],
   });
-
-  const navigate = useNavigate();
 
   useEffect(() => {
     refresh();
@@ -90,38 +80,50 @@ export default function Profiles() {
   async function refresh() {
     const list = await loadElders();
 
-    // NORMALIZE API response (server returns fields at top-level)
     const normalized = (list || []).map((e) => ({
       id: e.id,
       name: e.name,
-      gender: e.gender,
-      age: e.age ?? null,
+      age: e.age ?? "",
+      height: e.height ?? "",
+      weight: e.weight ?? "",
+      gender: e.gender || "Other",
+      diet: e.diet || "Non-veg",
       conditions: e.conditions || [],
       allergies: e.allergies || "",
       meds: e.meds || [],
-      diet: e.diet || "Non-veg",
     }));
 
     setElders(normalized);
   }
 
-  async function handleSave(payload) {
-    // server expects flat fields (name, age, gender, conditions, meds, diet)
-    const finalPayload = {
-      name: payload.name,
-      age: payload.age,
-      gender: payload.gender,
-      conditions: payload.conditions,
-      allergies: payload.allergies,
-      meds: payload.meds,
-      diet: payload.diet,
+  async function handleSave() {
+    const payload = {
+      name: form.name,
+      age: form.age ? Number(form.age) : null,
+      height: form.height ? Number(form.height) : null,
+      weight: form.weight ? Number(form.weight) : null,
+      gender: form.gender,
+      diet: form.diet,
+      conditions: form.conditions,
+      allergies: form.allergies,
+      meds: form.meds,
     };
 
-    if (editing) await updateElder(editing.id, finalPayload);
-    else await addElder(finalPayload);
+    if (editing) {
+      await updateElder(editing.id, payload);
+    } else {
+      await addElder(payload);
+    }
 
     setShowForm(false);
+    setEditing(null);
     refresh();
+  }
+
+  function handleEdit(elder) {
+    setEditing(elder);
+    setForm({ ...elder });
+    setShowForm(true);
   }
 
   return (
@@ -130,9 +132,10 @@ export default function Profiles() {
         <div className="card wide">
           <h2>Elder Profiles</h2>
           <p className="muted">
-            Store elder medical conditions, allergies, and medicines for safe
-            nutrition and health recommendations.
+            Manage elder health details for safe food and nutrition
+            recommendations.
           </p>
+
           <button
             className="btn primary"
             onClick={() => {
@@ -140,6 +143,8 @@ export default function Profiles() {
               setForm({
                 name: "",
                 age: "",
+                height: "",
+                weight: "",
                 gender: "Other",
                 diet: "Non-veg",
                 conditions: [],
@@ -149,34 +154,26 @@ export default function Profiles() {
               setShowForm(true);
             }}
           >
-            Add elder
+            Add Elder
           </button>
+
           {showForm && (
             <div className="card" style={{ marginTop: 12 }}>
               <form
                 className="stack"
-                onSubmit={async (e) => {
+                onSubmit={(e) => {
                   e.preventDefault();
-                  // convert meds string to array
-                  const payload = {
-                    name: form.name,
-                    age: form.age ? Number(form.age) : null,
-                    gender: form.gender,
-                    diet: form.diet,
-                    conditions: form.conditions,
-                    allergies: form.allergies,
-                    meds: Array.isArray(form.meds) ? form.meds : [],
-                  };
-
-                  await handleSave(payload);
+                  handleSave();
                 }}
               >
                 <label>
                   Name
                   <input
-                    value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
                     required
+                    value={form.name}
+                    onChange={(e) =>
+                      setForm({ ...form, name: e.target.value })
+                    }
                   />
                 </label>
 
@@ -185,7 +182,31 @@ export default function Profiles() {
                   <input
                     type="number"
                     value={form.age}
-                    onChange={(e) => setForm({ ...form, age: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, age: e.target.value })
+                    }
+                  />
+                </label>
+
+                <label>
+                  Height (cm)
+                  <input
+                    type="number"
+                    value={form.height}
+                    onChange={(e) =>
+                      setForm({ ...form, height: e.target.value })
+                    }
+                  />
+                </label>
+
+                <label>
+                  Weight (kg)
+                  <input
+                    type="number"
+                    value={form.weight}
+                    onChange={(e) =>
+                      setForm({ ...form, weight: e.target.value })
+                    }
                   />
                 </label>
 
@@ -193,7 +214,9 @@ export default function Profiles() {
                   Gender
                   <select
                     value={form.gender}
-                    onChange={(e) => setForm({ ...form, gender: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, gender: e.target.value })
+                    }
                   >
                     <option>Other</option>
                     <option>Male</option>
@@ -205,7 +228,9 @@ export default function Profiles() {
                   Diet
                   <select
                     value={form.diet}
-                    onChange={(e) => setForm({ ...form, diet: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, diet: e.target.value })
+                    }
                   >
                     <option>Non-veg</option>
                     <option>Veg</option>
@@ -214,15 +239,14 @@ export default function Profiles() {
 
                 <div>
                   <div className="muted">Conditions</div>
-                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 6 }}>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                     {defaultConditions.map((c) => (
-                      <label key={c} style={{ fontSize: 14 }}>
+                      <label key={c}>
                         <input
                           type="checkbox"
                           checked={form.conditions.includes(c)}
                           onChange={() => {
-                            const has = form.conditions.includes(c);
-                            const next = has
+                            const next = form.conditions.includes(c)
                               ? form.conditions.filter((x) => x !== c)
                               : [...form.conditions, c];
                             setForm({ ...form, conditions: next });
@@ -238,21 +262,24 @@ export default function Profiles() {
                   Allergies
                   <input
                     value={form.allergies}
-                    onChange={(e) => setForm({ ...form, allergies: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, allergies: e.target.value })
+                    }
                   />
                 </label>
 
                 <div>
                   <div className="muted">Medicines</div>
-                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 6 }}>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                     {defaultMeds.map((m) => (
-                      <label key={m} style={{ fontSize: 14 }}>
+                      <label key={m}>
                         <input
                           type="checkbox"
                           checked={form.meds.includes(m)}
                           onChange={() => {
-                            const has = form.meds.includes(m);
-                            const next = has ? form.meds.filter(x => x !== m) : [...form.meds, m];
+                            const next = form.meds.includes(m)
+                              ? form.meds.filter((x) => x !== m)
+                              : [...form.meds, m];
                             setForm({ ...form, meds: next });
                           }}
                         />
@@ -269,7 +296,10 @@ export default function Profiles() {
                   <button
                     type="button"
                     className="btn"
-                    onClick={() => setShowForm(false)}
+                    onClick={() => {
+                      setShowForm(false);
+                      setEditing(null);
+                    }}
                   >
                     Cancel
                   </button>
@@ -287,7 +317,8 @@ export default function Profiles() {
               <ProfileCard
                 key={e.id}
                 elder={e}
-                onOpen={() => navigate(`/elders/${e.id}`)} // ✅ ID-based routing
+                onView={() => navigate(`/elders/${e.id}`)}
+                onEdit={handleEdit}
                 onDelete={async (id) => {
                   await deleteElder(id);
                   refresh();
