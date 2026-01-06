@@ -68,8 +68,9 @@ function normalize(elder) {
 
 export async function loadElders() {
   const remote = await fallbackFetch(async () => {
+    console.debug('loadElders: fetching', API_BASE)
     const res = await fetch(API_BASE, { headers: getAuthHeaders() })
-    if (!res.ok) throw new Error('API error')
+    if (!res.ok) throw new Error(`API error: ${res.status}`)
     const data = await res.json()
     return data.map(normalize)
   })
@@ -80,13 +81,15 @@ export async function loadElders() {
 
 export async function addElder(elder) {
   const remote = await fallbackFetch(async () => {
+    console.debug('addElder: POST', API_BASE, elder)
     const res = await fetch(API_BASE, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify(elder)
     })
-    if (!res.ok) throw new Error('API error')
+    if (!res.ok) throw new Error(`API error: ${res.status}`)
     const data = await res.json()
+    console.debug('addElder: response', data)
     return normalize(data.elder)
   })
 
@@ -95,9 +98,9 @@ export async function addElder(elder) {
   // fallback
   const list = loadLocal()
   const entry = {
+    ...normalize(elder),
     id: Date.now().toString(36),
-    created_at: new Date().toISOString(),
-    ...normalize(elder)
+    created_at: new Date().toISOString()
   }
   list.unshift(entry)
   saveLocal(list)
